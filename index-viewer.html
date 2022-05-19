@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+		integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+	<title>HW1 詳解</title>
+
+
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+
+	<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+
+	<!-- Theme used for syntax highlighted code -->
+	<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+	<link rel="stylesheet" href="custom.css">
+	<style>
+		canvas#live2D {
+			transition-property: opacity;
+			transition-duration: 0.3s;
+			pointer-events: none;
+			position: fixed !important;
+			bottom: 0;
+			right: -20px;
+			z-index: 999999;
+			opacity: 1;
+		}
+
+		canvas#live2D:hover {
+			transition-delay: 0.5s;
+		}
+
+		canvas#live2D.hidden,
+		canvas#live2D:hover {
+			transition-property: opacity;
+			transition-duration: 0.3s;
+			opacity: 0;
+		}
+	</style>
+
+
+	<!-- Pollyfill script -->
+	<script src="./anime/dist/core-minified.js"></script>
+	<!-- Live2DCubismCore script -->
+	<script src="./anime/core/live2dcubismcore.js"></script>
+	<!-- Build script -->
+	<script src="./anime/dist/bundle.js"></script>
+	<script src="./anime/custom.js"></script>
+</head>
+
+<body onkeydown="toggleAvatar(event)" style="background-color: rgb(143,119,181);">
+
+
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h1>ㄤㄤ</h1>
+				<h1>好熱</h1>
+			</section>>
+		</div>
+	</div>
+	<script src="dist/reveal.js"></script>
+	<script src="plugin/notes/notes.js"></script>
+	<script src="plugin/markdown/markdown.js"></script>
+	<script src="plugin/highlight/highlight.js"></script>
+	<script src="plugin/math/math.js"></script>
+	<script>
+		function getPath() {
+			var path = "";
+			nodes = window.location.pathname.split('/');
+			for (var index = 0; index < nodes.length - 3; index++) {
+				path += "../";
+			}
+			return path;
+		}
+
+		// More info about initialization & config:
+		// - https://revealjs.com/initialization/
+		// - https://revealjs.com/config/
+		Reveal.initialize({
+			hash: true,
+			math: {
+				mathjax: 'https://cdn.jsdelivr.net/gh/mathjax/mathjax@2.7.8/MathJax.js',
+				config: 'TeX-AMS_HTML-full',
+				// pass other options into `MathJax.Hub.Config()`
+				TeX: {
+					Macros: {
+						RR: "{\\bf R}"
+					}
+				}
+			},
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath],
+			dependencies: [{
+				src: 'plugin/math/math.js',
+				async: true
+			}]
+		});
+
+		Reveal.on('autoanimate', event => {
+			setTimeout(function () {
+				removeAllAutoAnimates(event.toSlide)
+			}, Reveal.getConfig().autoAnimateDuration * 1000);
+
+		});
+
+
+		function removeAllAutoAnimates(element) {
+			try {
+				element.removeAttribute("data-auto-animate-target");
+				element.childNodes.forEach(element => {
+					removeAllAutoAnimates(element);
+				});
+			} catch {
+
+			}
+
+
+		}
+	</script>
+
+	<div style="display: none;" id="audio"></div>
+</body>
+<script type="module">
+	// Import the functions you need from the SDKs you need
+	import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+	import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-analytics.js";
+	import { getDatabase, ref, set, push, onValue, onChildAdded, update, remove } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+	// TODO: Add SDKs for Firebase products that you want to use
+	// https://firebase.google.com/docs/web/setup#available-libraries
+
+	// Your web app's Firebase configuration
+	// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+	const firebaseConfig = {
+		apiKey: "AIzaSyBow-a2CHmPBSTySU4dG7NvqsGG4kCst-E",
+		authDomain: "online-reveal-e7aa6.firebaseapp.com",
+		databaseURL: "https://online-reveal-e7aa6-default-rtdb.asia-southeast1.firebasedatabase.app",
+		projectId: "online-reveal-e7aa6",
+		storageBucket: "online-reveal-e7aa6.appspot.com",
+		messagingSenderId: "19156043244",
+		appId: "1:19156043244:web:b3d9ea05537e27bb1eecc9"
+	};
+
+	// Initialize Firebase
+	const app = initializeApp(firebaseConfig);
+	const analytics = getAnalytics(app);
+
+	const db = getDatabase(app);
+
+	onValue(ref(db, 'mx'), (snap) => {
+		mx = snap.val();
+		window.updateMouseData()
+	})
+	onValue(ref(db, 'my'), (snap) => {
+		my = snap.val();
+		window.updateMouseData()
+	})
+	onValue(ref(db, 'mouth'), (snap) => {
+		mouth = snap.val();
+		audioElem.innerHTML = mouth;
+	})
+	onValue(ref(db, 'sx'), (snap) => {
+		sx = snap.val();
+		Reveal.slide(sx.h, sx.v, sx.f)
+	})
+
+
+</script>
+<script>
+	// LIPSYNC
+	var audioElem = document.getElementById("audio");
+	var modifier = 150;
+	var lastVolume = 0;
+	var mx = 0, my = 0, mouth = 0, sx = 0;
+	// setInterval(() => {
+	// 	var volume = getMicorphoneVolume() / 150;
+	// 	var lowThreshold = 0.3;
+	// 	var modifiedVolume = 0;
+	// 	if (volume > lowThreshold) {
+	// 		modifiedVolume = (volume * 0.7 + lastVolume * 0.3);
+	// 	} else {
+	// 		modifiedVolume = lastVolume / 2;
+	// 	}
+	// 	audioElem.innerHTML = modifiedVolume;
+	// 	lastVolume = modifiedVolume;
+
+	// }, 10);
+
+	//toggle avatar visibility
+	function toggleAvatar(e) {
+		if (e.keyCode != 192) {
+			return;
+		};
+		var avatar = $("canvas#live2D");
+		if (avatar.hasClass("hidden")) {
+			avatar.removeClass("hidden");
+		} else {
+			avatar.addClass("hidden");
+		}
+	}
+	let oldmm = null;
+
+	const checkmm = setInterval(() => {
+		if (window.onmousemove) {
+			oldmm = window.onmousemove;
+			window.updateMouseData = () => {
+				let fakeMouse = { clientX: mx * window.innerWidth, clientY: my * window.innerHeight }
+				oldmm(fakeMouse);
+			}
+			window.clearInterval(checkmm);
+		}
+	}, 10);
+
+</script>
+
+</html>
